@@ -19,21 +19,25 @@ def get_file_path(profile=PROFILE, folder=FOLDER):
     return path
 
 # Example: "Mon Oct 10 16:40:28 2016"
-_DATE_FORMAT = "%a %b %d %X %Y"
+DATE_FORMAT = "%a %b %d %X %Y"
 
-def grab_one_mail(queue):
-    date = datetime.strptime(queue.popleft(), _DATE_FORMAT)
+def grab_one_mail(queue, date_format=DATE_FORMAT):
+    date_string = queue.popleft()
+    if date_format:
+        date = datetime.strptime(date_string, date_format)
+    else:
+        date = date_string
     return _mail(date, queue.popleft())
 
 
 _mail = namedtuple("mail", ['date', 'content'])
-def iter_mails(string, regex=RE_MSG_SPLIT):
+def iter_mails(string, regex=RE_MSG_SPLIT, options={}):
     res = deque(re.split(regex, string))
     # ignore things before the first separation (usually ``''``)
     res.popleft()
 
     while len(res) >= 2:
-        yield grab_one_mail(res)
+        yield grab_one_mail(res, **options)
 
 
 def list_mails():
