@@ -9,13 +9,12 @@ from datetime import datetime
 PROFILE = "scz1uax0.default"
 FOLDER = "msx.tu-dresden.de/test"
 
-RE_MSG_SPLIT = re.compile(r"^From - (.*)\n$", flags=re.MULTILINE)
+RE_MSG_SPLIT = re.compile(r"^From - (.*)\n", flags=re.MULTILINE)
 
 
 def get_file_path(profile=PROFILE, folder=FOLDER):
     base = os.path.expanduser("~/.thunderbird/")
     path = os.path.join(base, profile, "ImapMail", folder)
-    print("path:", path)
     return path
 
 # Example: "Mon Oct 10 16:40:28 2016"
