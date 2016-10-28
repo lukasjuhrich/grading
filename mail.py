@@ -4,10 +4,12 @@ import os
 import re
 from collections import deque, namedtuple
 from datetime import datetime
+from email import message_from_string
+from email.header import decode_header
 
 
 PROFILE = "scz1uax0.default"
-FOLDER = "msx.tu-dresden.de/test"
+FOLDER = "msx.tu-dresden.de/Prog"
 
 RE_MSG_SPLIT = re.compile(r"^From - (.*)\n", flags=re.MULTILINE)
 
@@ -61,12 +63,29 @@ def iter_mails(string, regex=RE_MSG_SPLIT, options=None):
         yield grab_one_mail(res, **options)
 
 
+def nice_header(encoded_string):
+    decoded_words = decode_header(encoded_string)
+    word = [w for w in decoded_words if w][0]
+
+    string_like = word[0]  # may be bytes or str
+
+    if isinstance(string_like, str):
+        return string_like
+
+    return string_like.decode(word[1])
+
+
 def list_mails():
     with open(get_file_path()) as desc:
         content = desc.read()
 
     for mail in iter_mails(content):
-        print("mail:", mail)
+        # print("mail:", mail)
+        msg = message_from_string(mail.content)
+
+        subject = nice_header(msg.get('subject', "<no subject>"))
+        print("Subject: {}".format(subject))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Extract mail.")
