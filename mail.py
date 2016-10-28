@@ -31,7 +31,10 @@ def grab_one_mail(queue, date_format=DATE_FORMAT):
 
 
 _mail = namedtuple("mail", ['date', 'content'])
-def iter_mails(string, regex=RE_MSG_SPLIT, options={}):
+def iter_mails(string, regex=RE_MSG_SPLIT, options=None):
+    if options is None:
+        options = {}
+
     res = deque(re.split(regex, string))
     # ignore things before the first separation (usually ``''``)
     res.popleft()
