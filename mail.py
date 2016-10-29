@@ -92,9 +92,28 @@ def list_mails():
               .format(i, date=mail.date, sender=sender, subj=subject))
 
 
+def iter_attachments(id):
+    mail_string = list(fetch_mails())[id].content
+    mail = message_from_string(mail_string)
+    for part in mail.walk():
+        filename = part.get_filename()
+        if not filename:
+            continue
+        yield part
+
+def show_attachments(id):
+    for attachment in iter_attachments(id):
+        print(attachment.get_filename())
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Extract mail.")
+    parser.add_argument("command")
+    parser.add_argument("-i", "--index", type=int, help="The mail to select")
 
     args = parser.parse_args()
 
-    list_mails()
+    if args.command == 'list':
+        list_mails()
+    elif args.command == 'extract':
+        show_attachments(args.index)
