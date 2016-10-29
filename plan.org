@@ -1,0 +1,73 @@
+#+TITLE: Grading-script concept
+#+SUBTITLE: Creating a python-script for easier, version controlled grading
+#+AUTHOR: Lukas Juhrich
+
+* What do I do when grading?
+
+1. Select the mail
+2. Put all attachments to $name/$exercise/
+3. Test the output of the file.  This can be:
+   - Running python
+   - Running a python script using this module.
+4. Look at the file and:
+   - Take notes (ref: lineno.)
+   - Give grades
+   - Take general notes
+5. Bulk send mails containing:
+   - General remarks
+   - Specific grading
+
+* What could be an appropriate cli workflow?
+
+Consider the following list to represent subcommands to a script,
+e.g. mail.py
+
+** General:
+
+   1. init
+      - creates config file (e.g. containing rounds) and default
+        templates
+
+** Per-round:
+
+   1. open $round
+      - Opens a grading round named $round, e.g. “Uebung02”
+      - Notes the name / date of this round in a file (/.grading?)
+      - Creates: $name/$round/grading.org, global/$round/remarks.org
+      - TODO add templates and use paths to templates
+      - Don't do it if a round is already open!
+   2. list
+      - lists mails
+   3. extract -i $index
+      - extracts the attachments of mail with index $index (according to
+        `list`)
+   4. emacs $name/$round/remarks.org
+   5. send-mails [--close]
+      - Merge specific grading and general remarks
+      - Format a MIME-mail adding X-Grading-Round:  Round and cc-ing yourself
+      - --close closes current round
+   6. close
+      - close the current round
+      - Add current timestamp to round config
+      - git add $config; git commit -m 'Close round $round'
+      - git tag $round
+
+* How should the grading be collected?
+
+** Sensible templates
+
+   The grading files need to “provide” a cumulated value like “2/10” points.
+
+   Example:
+   - Collect grading in a table of a specific form, cumulating the points at the bottom.
+   - Have a command populating a table from said points
+
+   Does orgmode have some special possibilities to provide such a
+   variable?  Grepping would also be an option, but I consider it
+   ugly.
+
+* Git-workflow
+
+  One could consider working with different branches for each round.
+  Pro: Rounds wouldn't have to be eternally „closed“, but can be
+  corrected afterwards.  Con: we need more git logic, so probably no.
