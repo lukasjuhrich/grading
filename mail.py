@@ -135,7 +135,14 @@ def iter_attachments(id):
 
 def show_attachments(id):
     for attachment in iter_attachments(id):
-        print(attachment.get_filename())
+        print("{name:=^80}".format(name=attachment.get_filename()))
+        print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
+        print()
+
+        payload = attachment.get_payload(decode=True)
+        # ``decode=True`` only decodes the base64
+        file_string = payload.decode('utf-8')
+        print(file_string)
 
 
 if __name__ == '__main__':
@@ -147,5 +154,8 @@ if __name__ == '__main__':
 
     if args.command == 'list':
         list_mails()
-    elif args.command == 'extract':
+    elif args.command == 'show_files':
         show_attachments(args.index)
+    else:
+        print("“{arg}” is not a valid argument.".format(arg=args.command))
+        exit(1)
