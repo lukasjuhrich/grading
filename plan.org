@@ -39,14 +39,16 @@ e.g. mail.py
    2. list
       - lists mails
    3. extract -i $index
-      - extracts the attachments of mail with index $index (according to
-        `list`)
-   4. emacs $name/$round/remarks.org
-   5. send-mails [--close]
+      - extracts the attachments of mail with index $index (according
+        to `list`)
+   4. test $round $name
+      - runs a test script being in global/$round
+   5. emacs $name/$round/remarks.org
+   6. send-mails [--close]
       - Merge specific grading and general remarks
       - Format a MIME-mail adding X-Grading-Round:  Round and cc-ing yourself
       - --close closes current round
-   6. close
+   7. close
       - close the current round
       - Add current timestamp to round config
       - git add $config; git commit -m 'Close round $round'
@@ -71,3 +73,5 @@ e.g. mail.py
   One could consider working with different branches for each round.
   Pro: Rounds wouldn't have to be eternally „closed“, but can be
   corrected afterwards.  Con: we need more git logic, so probably no.
+
+  Nice feature: Warn if there are unstaged changes.
