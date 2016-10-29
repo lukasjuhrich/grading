@@ -119,16 +119,16 @@ def list_mails():
               .format(i, date=mail.date, sender=sender, subj=subject))
 
 
-def iter_attachments(id):
+def iter_attachments(index):
     """Iterate over a mail's attachments
 
-    :param id: The id of the mail.
+    :param index: The index of the mail.
 
     :returns: An iterator over the MIME-parts where ``get_filename()``
               evaluates to ``True``
     :rtype: iterator[part]
     """
-    mail_string = list(fetch_mails())[id].content
+    mail_string = list(fetch_mails())[index].content
     mail = message_from_string(mail_string)
     for part in mail.walk():
         filename = part.get_filename()
@@ -137,8 +137,8 @@ def iter_attachments(id):
         yield part
 
 
-def show_attachments(id):
-    for attachment in iter_attachments(id):
+def show_attachments(index):
+    for attachment in iter_attachments(index):
         print("{name:=^80}".format(name=attachment.get_filename()))
         print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
         print()
@@ -171,10 +171,10 @@ def save_attachment(attachment, path, name_converter=None):
         fd.write(attachment.get_payload(decode=True))
 
 
-def save_attachments_of_person(id, person):
+def save_attachments_of_person(index, person):
     """The main subroutine for saving a person's attachments
 
-    :param int id: The message's index
+    :param int index: The message's index
     :param str person: The name of the person folder to use
     """
     if not person:
@@ -183,7 +183,7 @@ def save_attachments_of_person(id, person):
 
     path = os.path.join(person, current_round)
 
-    for attachment in iter_attachments(id):
+    for attachment in iter_attachments(index):
         save_attachment(attachment, path=path)
 
 
@@ -193,14 +193,28 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--index", type=int, help="The mail to select")
     parser.add_argument("-p", "--person", type=str, help="The person folder to use ")
 
-    args = parser.parse_args()
+    args = {param: value for param, value in parser.parse_args().__dict__.items()
+            if value}
+    command = args.pop('command')
 
-    if args.command == 'list':
-        list_mails()
-    elif args.command == 'show_files':
-        show_attachments(args.index)
-    elif args.command == 'save_files':
-        save_attachments_of_person(id=args.index, person=args.person)
-    else:
-        print("“{arg}” is not a valid argument.".format(arg=args.command))
+    command_mapping = {
+        'list': list_mails,
+        'show_files': show_attachments,
+        'save_files': save_attachments_of_person,
+    }
+
+    try:
+        subcommand = command_mapping[command]
+    except KeyError:
+        print("Invalid command:", command)
+        print("Available:", ", ".join(command_mapping.keys()))
         exit(1)
+
+    try:
+        subcommand(**args)
+    except TypeError as e:
+        error_string = e.args[0]
+        if "unexpected keyword argument" in error_string:
+            print("Unexpected argument:", error_string)
+        elif "missing" in error_string:
+            print("Missing argument:", error_string)
