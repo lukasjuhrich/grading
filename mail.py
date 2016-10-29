@@ -65,6 +65,20 @@ def iter_mails(string, regex=RE_MSG_SPLIT, options=None):
 
 
 def nice_header(encoded_string):
+    """Readably format an encoded mail header string
+
+    Mail strings can come either in plain or in encoded form like
+    ``"=?UTF-8?B?NC4gw5xidW5n?="``
+
+    Take the first non-nil word (``== (text, encoding)``) of the
+    decoded header.  If it is an instance of ``str``, return it.
+    Else, decode it with the given encoding.
+
+    :param encoded_string: A non-decoded header value.
+
+    :returns: The decoded header
+    :rtype: str
+    """
     decoded_words = decode_header(encoded_string)
     word = [w for w in decoded_words if w][0]
 
@@ -77,6 +91,15 @@ def nice_header(encoded_string):
 
 
 def fetch_mails():
+    """Return mails of the inbox sorted by date.
+
+    Sort :py:func:`iter_mails` by ``getattr('date')``.  Note that the
+    latter might differ from the actual ``"From:"``-header of the
+    mail.
+
+    :returns: A sorted list of mails
+    :rtype: list
+    """
     with open(get_file_path()) as desc:
         content = desc.read()
     return sorted(iter_mails(content), key=attrgetter('date'))
@@ -93,6 +116,14 @@ def list_mails():
 
 
 def iter_attachments(id):
+    """Iterate over a mail's attachments
+
+    :param id: The id of the mail.
+
+    :returns: An iterator over the MIME-parts where ``get_filename()``
+              evaluates to ``True``
+    :rtype: iterator[part]
+    """
     mail_string = list(fetch_mails())[id].content
     mail = message_from_string(mail_string)
     for part in mail.walk():
@@ -100,6 +131,7 @@ def iter_attachments(id):
         if not filename:
             continue
         yield part
+
 
 def show_attachments(id):
     for attachment in iter_attachments(id):
