@@ -1,7 +1,7 @@
 """
 
 mail.py
-~~~~~~
+~~~~~~~
 
 © Lukas Juhrich.
 
