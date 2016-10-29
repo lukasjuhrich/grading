@@ -84,10 +84,12 @@ def fetch_mails():
 
 def list_mails():
     for i, mail in enumerate(fetch_mails()):
-        msg = message_from_string(mail.content)
+        message = message_from_string(mail.content)
 
-        subject = nice_header(msg.get('subject', "<no subject>"))
-        print("Subject: {}".format(subject))
+        subject = nice_header(message.get('subject', "<no subject>"))
+        sender = message.get('From', "<no sender>")
+        print("{:2d} {date} {sender} »{subj}«"
+              .format(i, date=mail.date, sender=sender, subj=subject))
 
 
 if __name__ == '__main__':
