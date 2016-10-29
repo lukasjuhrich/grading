@@ -6,6 +6,7 @@ from collections import deque, namedtuple
 from datetime import datetime
 from email import message_from_string
 from email.header import decode_header
+from operator import attrgetter
 
 
 PROFILE = "scz1uax0.default"
@@ -75,12 +76,14 @@ def nice_header(encoded_string):
     return string_like.decode(word[1])
 
 
-def list_mails():
+def fetch_mails():
     with open(get_file_path()) as desc:
         content = desc.read()
+    return sorted(iter_mails(content), key=attrgetter('date'))
 
-    for mail in iter_mails(content):
-        # print("mail:", mail)
+
+def list_mails():
+    for i, mail in enumerate(fetch_mails()):
         msg = message_from_string(mail.content)
 
         subject = nice_header(msg.get('subject', "<no subject>"))
