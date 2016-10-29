@@ -161,6 +161,8 @@ def save_attachment(attachment, path, name_converter=None):
         in.
     :param callable name_converter: A callable converting the filename
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
     filename = attachment.get_filename()
     if name_converter is not None:
         filename = name_converter(filename)
