@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+
+mail.py
+~~~~~~
+
+© Lukas Juhrich.
+
+"""
+# pylint: disable=invalid-name
 import argparse
 import os
 import re
@@ -16,6 +25,14 @@ RE_MSG_SPLIT = re.compile(r"^From - (.*)\n", flags=re.MULTILINE)
 
 
 def get_file_path(profile=PROFILE, folder=FOLDER):
+    """return filepath fo thunderbird profile
+
+    :param str profile: profile name
+    :param str folder: Path to the inbox, relative to ``ImapMail``.
+
+    :returns: The joined, absolute path
+    :rtype: str
+    """
     base = os.path.expanduser("~/.thunderbird/")
     path = os.path.join(base, profile, "ImapMail", folder)
     return path
@@ -110,6 +127,7 @@ def fetch_mails():
 
 
 def list_mails():
+    """List all available mails in the inbox."""
     for i, mail in enumerate(fetch_mails()):
         message = message_from_string(mail.content)
 
@@ -138,6 +156,10 @@ def iter_attachments(index):
 
 
 def show_attachments(index):
+    """Show all attachments of a given mail
+
+    :param int index: the index of the mail
+    """
     for attachment in iter_attachments(index):
         print("{name:=^80}".format(name=attachment.get_filename()))
         print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
