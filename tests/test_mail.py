@@ -42,4 +42,4 @@ class IterMailsTestCase(TestCase):
         self.assertEqual(mails[0].content, "eins")
         self.assertEqual(mails[0].date, '2')
         self.assertEqual(mails[1].content, "zwei")
-        self.assertEqual(mails[0].date, '2')
+        self.assertEqual(mails[1].date, '2')
