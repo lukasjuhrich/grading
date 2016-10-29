@@ -12,8 +12,8 @@ import argparse
 import os
 from email import message_from_string
 
+from config import sample_config, add_person, delete_persons
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments
-
 
 ROUND = 'Uebung01'
 current_round = ROUND
@@ -62,20 +62,42 @@ def save_attachments_of_person(index, person):
         save_attachment(attachment, path=path)
 
 
+def init():
+    sample_config()
+    print("You can now start adding persons either manually or using this program.")
+
+
+def add_persons(*persons):
+    for person in persons:
+        try:
+            os.mkdir(person)
+        except FileExistsError:
+            print("Folder for person {} already exists".format(person))
+        except OSError:
+            print("Error creating person '{}'".format(person))
+            continue
+        add_person(person)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Extract mail.")
     parser.add_argument("command")
     parser.add_argument("-i", "--index", type=int, help="The mail to select")
     parser.add_argument("-p", "--person", type=str, help="The person folder to use ")
 
-    args = {param: value for param, value in parser.parse_args().__dict__.items()
-            if value}
+    parsed, unknown = parser.parse_known_args()
+    args = {param: value for param, value in parsed.__dict__.items() if value}
+    unknown = [arg for arg in unknown if not arg.startswith('-')]
+
     command = args.pop('command')
 
     command_mapping = {
+        'init': init,
         'list': list_mails,
         'show_files': show_attachments,
         'save_files': save_attachments_of_person,
+        'add_persons': add_persons,
+        'delete_persons': delete_persons,
     }
 
     try:
@@ -86,7 +108,7 @@ if __name__ == '__main__':
         exit(1)
 
     try:
-        subcommand(**args)
+        subcommand(*unknown, **args)
     except TypeError as e:
         error_string = e.args[0]
         if "unexpected keyword argument" in error_string:
