@@ -23,6 +23,10 @@ def get_file_path(profile=PROFILE, folder=FOLDER):
 # Example: "Mon Oct 10 16:40:28 2016"
 DATE_FORMAT = "%a %b %d %X %Y"
 
+ROUND = 'Uebung01'
+current_round = ROUND
+
+
 def grab_one_mail(queue, date_format=DATE_FORMAT):
     """Format two elments of a queue to a mail namedtuple
 
@@ -145,10 +149,49 @@ def show_attachments(id):
         print(file_string)
 
 
+def save_attachment(attachment, path, name_converter=None):
+    """Save an attachment in a given folder
+
+    Writes the Message payload to a file of name 'path' to the
+    filename.
+
+    :param Message attachment: The Mime-Part containing the
+        attachment.
+    :param str path: The path to the folder to save the attachments
+        in.
+    :param callable name_converter: A callable converting the filename
+    """
+    filename = attachment.get_filename()
+    if name_converter is not None:
+        filename = name_converter(filename)
+    full_path = os.path.join(path, filename)
+
+    print("Writing to '{}'…".format(full_path))
+    with open(full_path, 'wb') as fd:
+        fd.write(attachment.get_payload(decode=True))
+
+
+def save_attachments_of_person(id, person):
+    """The main subroutine for saving a person's attachments
+
+    :param int id: The message's index
+    :param str person: The name of the person folder to use
+    """
+    if not person:
+        print("Person missing")
+        exit(1)
+
+    path = os.path.join(person, current_round)
+
+    for attachment in iter_attachments(id):
+        save_attachment(attachment, path=path)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Extract mail.")
     parser.add_argument("command")
     parser.add_argument("-i", "--index", type=int, help="The mail to select")
+    parser.add_argument("-p", "--person", type=str, help="The person folder to use ")
 
     args = parser.parse_args()
 
@@ -156,6 +199,8 @@ if __name__ == '__main__':
         list_mails()
     elif args.command == 'show_files':
         show_attachments(args.index)
+    elif args.command == 'save_files':
+        save_attachments_of_person(id=args.index, person=args.person)
     else:
         print("“{arg}” is not a valid argument.".format(arg=args.command))
         exit(1)
