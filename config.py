@@ -15,6 +15,22 @@ a/b
 #END result
 """
 
+GLOBAL_FOLDER_NAME = "global"
+GLOBAL_FILENAME = "remarks.org"
+GLOBAL_TEMPLATE = """\
+Generelle Anmerkungen:
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Tipps / Tricks
+
+* Wichtige Dinge
+
+* Kleinere Fehler
+
+* Sonstiges
+
+"""
+
 
 def load_config(file=CONFIG_FILENAME):
     with open(file) as stream:
@@ -67,7 +83,7 @@ def open_rounds():
     return count
 
 
-def prepare_grading(person, round_):
+def prepare_person_grading(person, round_):
     """Populate a folder with default grading files.
 
     Expect only the ``person`` folder to be present.  The ``round``
@@ -91,6 +107,17 @@ def prepare_grading(person, round_):
     subprocess.call(['git', 'add', filename])
 
 
+def prepare_global_grading(round_name):
+    path = os.path.join(GLOBAL_FOLDER_NAME, round_name)
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
+    with open(os.path.join(path, GLOBAL_FILENAME), 'w') as file:
+        file.write(GLOBAL_TEMPLATE)
+
+
 def add_round(round_name):
     """Add a round given a name.
 
@@ -107,7 +134,9 @@ def add_round(round_name):
     config['rounds'][round_name] = {'opened': datetime.now()}
 
     for person in config['persons']:
-        prepare_grading(person, round_name)
+        prepare_person_grading(person, round_name)
+
+    prepare_global_grading(round_name)
 
     write_config(config)
 
