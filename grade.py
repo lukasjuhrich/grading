@@ -12,7 +12,7 @@ import argparse
 import os
 from email import message_from_string
 
-from config import sample_config, add_person, delete_persons
+from config import sample_config, add_person, delete_persons, add_round, close_round
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments
 
 ROUND = 'Uebung01'
@@ -98,6 +98,8 @@ if __name__ == '__main__':
         'save_files': save_attachments_of_person,
         'add_persons': add_persons,
         'delete_persons': delete_persons,
+        'add_round': add_round,
+        'close_round': close_round,
     }
 
     try:
