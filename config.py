@@ -5,6 +5,15 @@ from datetime import datetime
 from yaml import dump, load
 
 CONFIG_FILENAME = '.grade'
+GRADING_FILENAME = 'grading.org'
+GRADING_TEMPLATE = """Hallo {Person},
+
+Hier die Bewertung für {Übung}.
+
+#BEGIN result
+a/b
+#END result
+"""
 
 
 def load_config(file=CONFIG_FILENAME):
@@ -58,6 +67,30 @@ def open_rounds():
     return count
 
 
+def prepare_grading(person, round_):
+    """Populate a folder with default grading files.
+
+    Expect only the ``person`` folder to be present.  The ``round``
+    folder is created if necessary.
+
+    At the end, Stage the file with git.
+
+    :param str person: The person
+    :param str round_: The round
+    """
+    path = os.path.join(person, round_)
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
+    filename = os.path.join(path, GRADING_FILENAME)
+    with open(filename, 'w') as file:
+        file.write(GRADING_TEMPLATE)
+        print("Created", file.name)
+    subprocess.call(['git', 'add', filename])
+
+
 def add_round(round_name):
     """Add a round given a name.
 
@@ -74,10 +107,7 @@ def add_round(round_name):
     config['rounds'][round_name] = {'opened': datetime.now()}
 
     for person in config['persons']:
-        filename = os.path.join(person, round_name, 'remarks.org')
-        # creates the file
-        open(filename, 'a').close()
-        subprocess.call('git', 'add', filename)
+        prepare_grading(person, round_name)
 
     write_config(config)
 
