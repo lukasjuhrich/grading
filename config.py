@@ -6,12 +6,16 @@ from yaml import dump, load
 
 CONFIG_FILENAME = '.grade'
 GRADING_FILENAME = 'grading.org'
-GRADING_TEMPLATE = """Hallo {Person},
+GRADING_TEMPLATE = """\
+# -*- mode: org; -*-
 
-Hier die Bewertung für {Übung}.
+* Bewertung
+
+
+* Ergebnis
 
 #BEGIN result
-a/b
+a/10+1
 #END result
 """
 
@@ -110,7 +114,7 @@ def prepare_person_grading(person, round_):
 def prepare_global_grading(round_name):
     path = os.path.join(GLOBAL_FOLDER_NAME, round_name)
     try:
-        os.mkdir(path)
+        os.makedirs(path)
     except FileExistsError:
         pass
 
