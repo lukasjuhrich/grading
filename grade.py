@@ -117,3 +117,5 @@ if __name__ == '__main__':
             print("Unexpected argument:", error_string)
         elif "missing" in error_string:
             print("Missing argument:", error_string)
+        else:
+            raise
