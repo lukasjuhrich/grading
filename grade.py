@@ -15,6 +15,7 @@ from email import message_from_string
 from config import sample_config, add_person, delete_persons, add_round, \
     close_round, current_round_name
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments
+from send_mail import format_mail
 
 def list_mails():
     """List all available mails in the inbox."""
@@ -99,6 +100,7 @@ if __name__ == '__main__':
         'delete_persons': delete_persons,
         'add_round': add_round,
         'close_round': close_round,
+        'format': format_mail,
     }
 
     try:

@@ -20,6 +20,7 @@ a/10+1
 """
 
 GLOBAL_FOLDER_NAME = "global"
+GLOBAL_MAIL_NAME = 'mail.txt'
 GLOBAL_FILENAME = "remarks.org"
 GLOBAL_TEMPLATE = """\
 Generelle Anmerkungen:
