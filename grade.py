@@ -32,6 +32,8 @@ def show_attachments(index):
 
     :param int index: the index of the mail
     """
+    message = message_from_string(fetch_mails()[index].content)
+    print("Author:", message.get('From', "<no sender>"))
     for attachment in iter_attachments(index):
         print("{name:=^80}".format(name=attachment.get_filename()))
         print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
