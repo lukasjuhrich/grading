@@ -12,8 +12,7 @@ import argparse
 import os
 from email import message_from_string
 
-from config import sample_config, add_person, delete_persons, add_round, \
-    close_round, current_round_name
+from config import config
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments
 from send_mail import format_mail
 
@@ -56,14 +55,14 @@ def save_attachments_of_person(index, person):
         print("Person missing")
         exit(1)
 
-    path = os.path.join(person, current_round_name())
+    path = os.path.join(person, config.current_round_name)
 
     for attachment in iter_attachments(index):
         save_attachment(attachment, path=path)
 
 
 def init():
-    sample_config()
+    config.create_sample_config()
     print("You can now start adding persons either manually or using this program.")
 
 
@@ -76,7 +75,7 @@ def add_persons(*persons):
         except OSError:
             print("Error creating person '{}'".format(person))
             continue
-        add_person(person)
+        config.add_person(person)
 
 
 if __name__ == '__main__':
@@ -97,9 +96,9 @@ if __name__ == '__main__':
         'show_files': show_attachments,
         'save_files': save_attachments_of_person,
         'add_persons': add_persons,
-        'delete_persons': delete_persons,
-        'add_round': add_round,
-        'close_round': close_round,
+        'delete_persons': config.delete_persons,
+        'add_round': config.add_round,
+        'close_round': config.close_round,
         'format': format_mail,
     }
 
