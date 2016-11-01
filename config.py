@@ -49,23 +49,28 @@ def write_config(config, file=CONFIG_FILENAME):
 
 def sample_config():
     """Create a sample config"""
-    write_config({'persons': [], 'rounds': {}})
+    write_config({'persons': {}, 'rounds': {}})
 
 
-def add_person(name):
+def add_person(name, email=''):
     config = load_config()
 
     if name in config['persons']:
         print("Person {} already exists, skipping.".format(name))
 
-    config['persons'].append(name)
+    config['persons'][name] = email
     write_config(config)
 
 
 def delete_persons():
     config = load_config()
-    config['persons'] = []
+    config['persons'] = {}
     write_config(config)
+
+
+def get_person_mail(person):
+    config = load_config()
+    return config['persons'].get(person)
 
 
 def open_rounds():
