@@ -127,8 +127,10 @@ def prepare_global_grading(round_name):
     except FileExistsError:
         pass
 
-    with open(os.path.join(path, GLOBAL_FILENAME), 'w') as file:
+    filename = os.path.join(path, GLOBAL_FILENAME)
+    with open(filename, 'w') as file:
         file.write(GLOBAL_TEMPLATE)
+    subprocess.call(['git', 'add', filename])
 
 
 def add_round(round_name):
