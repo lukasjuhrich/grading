@@ -41,7 +41,7 @@ def format_mail(person, round, email=None):
 
     fixed_dir = os.path.join(person, round, 'fixed')
 
-    for filename in os.listdir(fixed_dir):
+    for filename in os.listdir(fixed_dir) if os.path.isdir(fixed_dir) else []:
         path = os.path.join(fixed_dir, filename)
         if not os.path.isfile(path) or path.endswith('~'):
             continue
