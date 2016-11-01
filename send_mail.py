@@ -14,6 +14,7 @@ from secret import pw as PASSWORD, login as USERNAME
 def format_mail(person, round, email=None):
     if email is None:
         email = get_person_mail(person)
+        print("choosing mail:", email)
         if not email:
             print("{} has no Mail!".format(person))
             exit(1)
