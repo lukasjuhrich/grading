@@ -12,12 +12,9 @@ import argparse
 import os
 from email import message_from_string
 
-from config import sample_config, add_person, delete_persons, add_round, close_round
+from config import sample_config, add_person, delete_persons, add_round, \
+    close_round, current_round_name
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments
-
-ROUND = 'Uebung01'
-current_round = ROUND
-
 
 def list_mails():
     """List all available mails in the inbox."""
@@ -56,7 +53,7 @@ def save_attachments_of_person(index, person):
         print("Person missing")
         exit(1)
 
-    path = os.path.join(person, current_round)
+    path = os.path.join(person, current_round_name())
 
     for attachment in iter_attachments(index):
         save_attachment(attachment, path=path)

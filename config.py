@@ -87,6 +87,15 @@ def open_rounds():
     return count
 
 
+def current_round_name():
+    open_rounds()  # causes an exit if inconsistent
+
+    config = load_config()
+    open_round_names = [name for name, data in config['rounds'].items()
+                        if not data.get('closed', False)]
+    return open_round_names.pop()
+
+
 def prepare_person_grading(person, round_):
     """Populate a folder with default grading files.
 
