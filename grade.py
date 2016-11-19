@@ -37,7 +37,7 @@ def show_attachments(index):
     for attachment in iter_attachments(index):
         filename = attachment.get_filename()
         print("{name:=^80}".format(name=filename))
-        print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
+        print("Is multipart:", "yes" if attachment.is_multipart() else "no")
         print()
 
         print(decode_attachment(attachment))
