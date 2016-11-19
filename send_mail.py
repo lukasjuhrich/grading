@@ -73,4 +73,7 @@ def format_mail(person, round, email=None):
     # s.set_debuglevel(1)
     s.starttls()
     s.login(USERNAME, PASSWORD)
+    print("email:", email)
+    print("from_:", from_)
+    print("message:", message)
     s.send_message(message, from_addr=from_, to_addrs=[email, from_])
