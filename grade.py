@@ -13,7 +13,7 @@ import os
 from email import message_from_string
 
 from config import config
-from mail import save_attachment, fetch_mails, nice_header, iter_attachments
+from mail import save_attachment, fetch_mails, nice_header, iter_attachments, decode_attachment
 from send_mail import format_mail
 
 def list_mails():
@@ -35,14 +35,12 @@ def show_attachments(index):
     message = message_from_string(fetch_mails()[index].content)
     print("Author:", message.get('From', "<no sender>"))
     for attachment in iter_attachments(index):
-        print("{name:=^80}".format(name=attachment.get_filename()))
+        filename = attachment.get_filename()
+        print("{name:=^80}".format(name=filename))
         print("Is multipart:", ("no", "yes")[attachment.is_multipart()])
         print()
 
-        payload = attachment.get_payload(decode=True)
-        # ``decode=True`` only decodes the base64
-        file_string = payload.decode('utf-8')
-        print(file_string)
+        print(decode_attachment(attachment))
 
 
 def save_attachments_of_person(index, person):

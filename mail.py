@@ -161,3 +161,41 @@ def save_attachment(attachment, path, name_converter=None):
     print("Writing to '{}'…".format(full_path))
     with open(full_path, 'wb') as fd:
         fd.write(attachment.get_payload(decode=True))
+
+
+ENCODINGS = ('utf-8', 'latin-1')
+def attempt_decoding(payload):
+    """Try to decode a bytes object by a list of encodings.
+
+    :param bytes payload: the bytes object to decode
+
+    :raises UnicodeDecodeError: If every decoding fails.
+
+    :returns: The decoded string
+    :rtype: str
+    """
+    for encoding in ENCODINGS:
+        try:
+            return payload.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+
+    raise UnicodeDecodeError("Every attempted encoding failed ('{}')"
+                             .format("', '".join(ENCODINGS)))
+
+
+def decode_attachment(attachment):
+    """Try to decode an attachment.
+
+    :param bytes attachment: an attachment
+
+    :returns: The decoded attachment
+    :rtype: str
+    """
+    # ``decode=True`` only decodes possible base64, returns bytes
+    payload = attachment.get_payload(decode=True)
+    try:
+        return attempt_decoding(payload)
+    except UnicodeDecodeError:
+        print("Attachment '{}' could not be decoded".format(attachment.get_filename()))
+        exit(1)
