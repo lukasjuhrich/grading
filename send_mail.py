@@ -7,13 +7,13 @@ from email.mime.base import MIMEBase
 from smtplib import SMTP
 
 from config import GLOBAL_FOLDER_NAME, GLOBAL_MAIL_NAME, GLOBAL_FILENAME, \
-    GRADING_FILENAME, get_person_mail
+    GRADING_FILENAME, config
 from secret import pw as PASSWORD, login as USERNAME
 
 
 def format_mail(person, round, email=None):
     if email is None:
-        email = get_person_mail(person)
+        email = config.get_person_mail(person)
         print("choosing mail:", email)
         if not email:
             print("{} has no Mail!".format(person))
