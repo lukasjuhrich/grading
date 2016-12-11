@@ -14,6 +14,7 @@ from email import message_from_string
 
 from config import config
 from mail import save_attachment, fetch_mails, nice_header, iter_attachments, decode_attachment
+from marks import grades_overview
 from send_mail import format_mail
 
 def list_mails():
@@ -99,6 +100,7 @@ if __name__ == '__main__':
         'prepare_round': config.copy_round_templates,
         'close_round': config.close_round,
         'format': format_mail,
+        'grades': grades_overview,
     }
 
     try:
