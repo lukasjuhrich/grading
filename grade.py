@@ -96,6 +96,7 @@ if __name__ == '__main__':
         'add_persons': add_persons,
         'delete_persons': config.delete_persons,
         'add_round': config.add_round,
+        'prepare_round': config.copy_round_templates,
         'close_round': config.close_round,
         'format': format_mail,
     }

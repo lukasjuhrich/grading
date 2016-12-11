@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 from datetime import datetime
 
@@ -127,13 +128,14 @@ class GradingConfig:
 
         self.config_dict['rounds'][round_name] = {'opened': datetime.now()}
 
-        for person in self.config_dict['persons']:
-            prepare_person_grading(person, round_name)
-
+        self.copy_round_templates()
         prepare_global_grading(round_name)
 
         self._write_config()
 
+    def copy_round_templates(self):
+        for person in self.config_dict['persons']:
+            prepare_person_grading(person, self.current_round_name)
 
     def close_round(self):
         """Close the currently open round.
@@ -175,9 +177,17 @@ def prepare_person_grading(person, round_):
         pass
 
     filename = os.path.join(path, GRADING_FILENAME)
-    with open(filename, 'w') as file:
-        file.write(GRADING_TEMPLATE)
-        print("Created", file.name)
+    template_filename = os.path.join(GLOBAL_FOLDER_NAME, round_, GRADING_FILENAME)
+
+    if os.path.isfile(template_filename):
+        shutil.copy(template_filename, filename)
+    else:
+        print("Template {} doesn't exist.  Using default template."
+              .format(template_filename))
+        with open(filename, 'w') as file:
+            file.write(GRADING_TEMPLATE)
+
+    print("Created", filename)
     subprocess.call(['git', 'add', filename])
 
 
