@@ -1,6 +1,7 @@
 import os
 import re
 from config import config
+from operator import itemgetter
 
 GRADE_REGEX = r" *#\+BEGIN_RESULT\n(?P<given>.*)/(?P<total>.*)\n *#\+END_RESULT"
 
@@ -132,7 +133,56 @@ def person_grade_sum(person):
         total += result['total']
     return given, total
 
-def grades_overview():
+
+NEEDED = 78
+EXERCISES_NEEDED = 9
+# STILL_AHEAD = 7
+
+CELL_WIDTH = 20
+CELL_FMT = "{{: <{width}}}".format(width=CELL_WIDTH)
+
+def person_overview(person):
+    """Build a formatted overview of a person's grades"""
+    overview = ''
+
+    overview += "Grades for person '{}'\n".format(person)
+
+    all_grades = ((round_, grade['given'], grade['total'])
+                  for round_, grade in grades_of_person(person))
+    all_grades = sorted(all_grades, key=itemgetter(0))
+
+    overview += "\n{header}\n{blank:-<{width}}\n".format(
+        header=''.join(CELL_FMT.format(x) for x in ("Round", "Given", "Total")),
+        width=CELL_WIDTH*3,
+        blank='',
+    )
+
+    for tuple_ in all_grades:
+        overview += ''.join(CELL_FMT.format(item) for item in tuple_)
+        overview += '\n'
+
+    sum_gotten = sum((x[1] for x in all_grades), CombinedGrade(0))
+    sum_total = sum((x[2] for x in all_grades), CombinedGrade(0))
+
+    overview += '\n'
+    overview += "You got {} out of (currently) {} points.\n".format(sum_gotten, sum_total)
+    if sum_gotten < NEEDED:
+        overview += "You are missing {} points to reach the {} point passing barrier.\n"\
+                    .format(NEEDED - sum_gotten, NEEDED)
+    else:
+        overview += "You surpassed the {} point passing barrier by {} points.\n"\
+                    .format(NEEDED, sum_gotten - NEEDED)
+    overview += "You sent in {} out of {} necessary exercises.\n"\
+                .format(sum(bool(x[1]) for x in all_grades), EXERCISES_NEEDED)
+    return overview
+
+
+def grades_overview(person=None, *a, **kw):
+    if person:
+        print(person_overview(person, *a, **kw))
+        exit(0)
+
     for person in config.config_dict['persons']:
         given, total = person_grade_sum(person)
-        print("{}: {} / {}".format(person, given, total))
+        missing = NEEDED - float(given)
+        print("{}: {} / {} ({} missing)".format(person, given, total, missing))
