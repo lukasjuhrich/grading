@@ -11,6 +11,36 @@ from config import GLOBAL_FOLDER_NAME, GLOBAL_MAIL_NAME, GLOBAL_FILENAME, \
 from secret import pw as PASSWORD, login as USERNAME
 
 
+def iter_folder_attachments(path):
+    """Yield the contents of `path` as MIME messages"""
+    for filename in os.listdir(path) if os.path.isdir(path) else []:
+        path = os.path.join(path, filename)
+        if not os.path.isfile(path) or path.endswith('~'):
+            continue
+        # Guess the content type based on the file's extension.  Encoding
+        # will be ignored, although we should check for simple things like
+        # gzip'd or compressed files.
+        ctype, encoding = mimetypes.guess_type(path)
+        if ctype is None or encoding is not None:
+            # No guess could be made, or the file is encoded (compressed), so
+            # use a generic bag-of-bits type.
+            ctype = 'application/octet-stream'
+            maintype, subtype = ctype.split('/', 1)
+        if maintype == 'text':
+            with open(path) as fp:
+                # Note: we should handle calculating the charset
+                msg = MIMEText(fp.read(), _subtype=subtype)
+        else:
+            with open(path, 'rb') as fp:
+                msg = MIMEBase(maintype, subtype)
+                msg.set_payload(fp.read())
+                # Encode the payload using Base64
+            encoders.encode_base64(msg)
+            # Set the filename parameter
+        msg.add_header('Content-Disposition', 'attachment', filename=filename)
+        yield msg
+
+
 def format_mail(person, round, email=None):
     if email is None:
         email = config.get_person_mail(person)
@@ -40,34 +70,8 @@ def format_mail(person, round, email=None):
     with open(global_remarks_filename) as file:
         message.attach(MIMEText(file.read()))
 
-    fixed_dir = os.path.join(person, round, 'fixed')
-
-    for filename in os.listdir(fixed_dir) if os.path.isdir(fixed_dir) else []:
-        path = os.path.join(fixed_dir, filename)
-        if not os.path.isfile(path) or path.endswith('~'):
-            continue
-        # Guess the content type based on the file's extension.  Encoding
-        # will be ignored, although we should check for simple things like
-        # gzip'd or compressed files.
-        ctype, encoding = mimetypes.guess_type(path)
-        if ctype is None or encoding is not None:
-            # No guess could be made, or the file is encoded (compressed), so
-            # use a generic bag-of-bits type.
-            ctype = 'application/octet-stream'
-        maintype, subtype = ctype.split('/', 1)
-        if maintype == 'text':
-            with open(path) as fp:
-                # Note: we should handle calculating the charset
-                msg = MIMEText(fp.read(), _subtype=subtype)
-        else:
-            with open(path, 'rb') as fp:
-                msg = MIMEBase(maintype, subtype)
-                msg.set_payload(fp.read())
-            # Encode the payload using Base64
-            encoders.encode_base64(msg)
-        # Set the filename parameter
-        msg.add_header('Content-Disposition', 'attachment', filename=filename)
-        message.attach(msg)
+    for attachment in iter_folder_attachments(os.path.join(person, round, 'fixed')):
+        message.attach(attachment)
 
     s = SMTP('msx.tu-dresden.de', port=587)
     # s.set_debuglevel(1)
