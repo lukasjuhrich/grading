@@ -41,36 +41,26 @@ def iter_folder_attachments(path):
         yield msg
 
 
-def format_mail(person, round, email=None):
-    if email is None:
-        email = config.get_person_mail(person)
-        print("choosing mail:", email)
-        if not email:
-            print("{} has no Mail!".format(person))
-            exit(1)
+DEFAULT_SENDER = "Lukas Juhrich <lukas.juhrich@tu-dresden.de>"
+
+def send_mail_to_person(person, subject, sender=DEFAULT_SENDER, attachments=None, args=None):
+    email = config.get_person_mail(person)
+    print("choosing mail:", email)
+    if not email:
+        print("{} has no Mail!".format(person))
+        exit(1)
 
     message = MIMEMultipart()
-
-    mail_filename = os.path.join(GLOBAL_FOLDER_NAME, round, GLOBAL_MAIL_NAME)
-    with open(mail_filename) as file:
-        message.attach(MIMEText(file.read()))
-
-    from_ = "Lukas Juhrich <lukas.juhrich@tu-dresden.de>"
-    message['From'] = from_
-    message['CC'] = from_
-    message['Subject'] = "Bewertung {}".format(round)
+    message['From'] = sender
+    message['CC'] = sender
+    message['Subject'] = subject
     message['To'] = email
-    message['X-Grading-Round'] = round
+    message['X-Delivered-By'] = 'grading'
+    if args:
+        for key, value in args.items():
+            message[key] = value
 
-    specific_filename = os.path.join(person, round, GRADING_FILENAME)
-    with open(specific_filename) as file:
-        message.attach(MIMEText(file.read()))
-
-    global_remarks_filename = os.path.join(GLOBAL_FOLDER_NAME, round, GLOBAL_FILENAME)
-    with open(global_remarks_filename) as file:
-        message.attach(MIMEText(file.read()))
-
-    for attachment in iter_folder_attachments(os.path.join(person, round, 'fixed')):
+    for attachment in attachments:
         message.attach(attachment)
 
     s = SMTP('msx.tu-dresden.de', port=587)
@@ -78,6 +68,37 @@ def format_mail(person, round, email=None):
     s.starttls()
     s.login(USERNAME, PASSWORD)
     print("email:", email)
-    print("from_:", from_)
+    print("sender:", sender)
     print("message:", message)
-    s.send_message(message, from_addr=from_, to_addrs=[email, from_])
+    s.send_message(message, from_addr=sender, to_addrs=[email, sender])
+
+
+def format_mail(person, round, email=None, sender=DEFAULT_SENDER):
+    if email is None:
+        email = config.get_person_mail(person)
+        print("choosing mail:", email)
+        if not email:
+            print("{} has no Mail!".format(person))
+            exit(1)
+
+    attachments = []
+    mail_filename = os.path.join(GLOBAL_FOLDER_NAME, round, GLOBAL_MAIL_NAME)
+    with open(mail_filename) as file:
+        attachments.append(MIMEText(file.read()))
+
+    subject = "Bewertung {}".format(round)
+
+    specific_filename = os.path.join(person, round, GRADING_FILENAME)
+    with open(specific_filename) as file:
+        attachments.append(MIMEText(file.read()))
+
+    global_remarks_filename = os.path.join(GLOBAL_FOLDER_NAME, round, GLOBAL_FILENAME)
+    with open(global_remarks_filename) as file:
+        attachments.append(MIMEText(file.read()))
+
+    for attachment in iter_folder_attachments(os.path.join(person, round, 'fixed')):
+        attachments.append(attachment)
+
+    send_mail_to_person(person, subject, sender,
+                        attachments,
+                        args={'X-Grading-Round': round})
