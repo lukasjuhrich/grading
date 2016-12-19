@@ -107,7 +107,8 @@ def extract_grade_from_file(filename):
 
     results = re.search(GRADE_REGEX, content)
 
-    return {key: val.strip() for key, val in results.groupdict().items()}
+    return {key: CombinedGrade.from_string(val.strip())
+            for key, val in results.groupdict().items()}
 
 
 def grades_of_person(person):
@@ -126,8 +127,8 @@ def grades_of_everyone():
 def person_grade_sum(person):
     given, total = CombinedGrade(), CombinedGrade()
     for _, result in grades_of_person(person):
-        given += CombinedGrade.from_string(result['given'])
-        total += CombinedGrade.from_string(result['total'])
+        given += result['given']
+        total += result['total']
     return given, total
         
 
