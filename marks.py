@@ -13,7 +13,7 @@ class CombinedGrade:
     def from_string(cls, string):
         splitted = string.split('+')
         if len(splitted) <= 2:
-            return cls(*splitted)
+            return cls(*(x or 0 for x in splitted))
 
         normal, extra, rest = splitted
         if rest:
