@@ -33,12 +33,43 @@ class CombinedGrade:
             normal=self.normal + other.normal,
             extra=self.extra + other.extra,
         )
-        
+
+    def __rsub__(self, other):
+        # we can assert that the other operand isn't a
+        # `CombinedGrade`, else it would supprt addition
+        return other - float(self)
+
+    def __sub__(self, other):
+        try:
+            return CombinedGrade(
+                normal=self.normal - other.normal,
+                extra=self.extra - other.extra,
+            )
+        except AttributeError:
+            return float(self) - other
+
+    def __le__(self, other):
+        try:
+            return self.normal <= other.normal and self.extra <= other.extra
+        except AttributeError:
+            return float(self) <= other
+
+    def __lt__(self, other):
+        try:
+            return self.normal < other.normal and self.extra < other.extra
+        except AttributeError:
+            return float(self) < other
+
+    def __float__(self):
+        return self.normal + self.extra
+
     def __repr__(self):
         if not self.extra:
             return '{}'.format(self.normal)
         return '{}+{}'.format(self.normal, self.extra)
-    
+
+    def __format__(self, spec):
+        return str(self).__format__(spec)
 
 
 def extract_grade_from_file(filename):
