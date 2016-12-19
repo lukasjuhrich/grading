@@ -119,6 +119,7 @@ def grades_of_person(person):
         except FileNotFoundError:
             continue
 
+
 def grades_of_everyone():
     for person in config.config_dict['persons']:
         yield person, dict(grades_of_person(person))
@@ -130,7 +131,6 @@ def person_grade_sum(person):
         given += result['given']
         total += result['total']
     return given, total
-        
 
 def grades_overview():
     for person in config.config_dict['persons']:
